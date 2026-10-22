@@ -4,10 +4,13 @@ A REST API for personal movie watchlists.
 
 ## Current Status
 
-The project foundation is implemented:
+The following components are implemented:
 - FastAPI application factory.
+- Validated configuration loaded from environment variables and `.env`.
+- Required JWT secret with no default value.
 - Liveness endpoint.
-- Automated test.
+- Consistent JSON error responses.
+- Isolated configuration and API error tests.
 - Ruff, strict mypy, and an 80% coverage gate.
 
 Authentication and watchlist endpoints are planned.
@@ -18,6 +21,26 @@ See `docs/api.md` for the target API contract.
 - Python 3.14, or permission for uv to install it.
 - uv.
 - Make, if using the convenience commands.
+
+## Local Configuration
+
+Run all commands from the repository root.
+
+Before the first application start:
+1. Copy `.env.example` to `.env`.
+2. Generate a local secret:
+
+   ```bash
+   uv run python -c "import secrets; print(secrets.token_urlsafe(48))"
+   ```
+
+3. Set `REELSHELF_JWT_SECRET` in `.env` to the generated value.
+
+Do not commit `.env`.
+Environment variables override values from `.env`.
+The application refuses to start with invalid configuration.
+
+Tests use isolated settings and do not require a local `.env`.
 
 ## Run
 
