@@ -13,8 +13,28 @@ The following components are implemented:
 - Isolated configuration and API error tests.
 - Ruff, strict mypy, and an 80% coverage gate.
 
+- Domain entities for users, watchlist entries, and refresh sessions.
+- Repository protocols and in-memory implementations.
+- Owner-scoped entry operations, filtering, and pagination.
+- Per-application storage isolation.
+- Atomic refresh-session consumption within one event loop.
+
 Authentication and watchlist endpoints are planned.
 See `docs/api.md` for the target API contract.
+
+## Storage Limitations
+
+Data is stored in memory and is lost when the application restarts.
+The application must run as a single process.
+
+Each application instance owns separate repositories.
+Multiple worker processes would not share their data.
+
+Atomic refresh-session consumption is a storage primitive.
+The complete refresh rotation workflow is implemented in the
+authentication stage.
+
+Goal 8 replaces in-memory storage with PostgreSQL.
 
 ## Requirements
 

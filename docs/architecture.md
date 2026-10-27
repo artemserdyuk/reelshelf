@@ -64,3 +64,17 @@ In-memory refresh rotation must still consume tokens atomically.
 Add ORM models, async sessions, PostgreSQL repositories, migrations,
 and a transactional unit of work.
 Preserve HTTP contracts and domain behaviour where practical.
+
+## Composition and Storage
+
+`bootstrap.py` creates the application container.
+Each application instance owns one container.
+
+Repository contracts are defined in `domain/repositories.py`.
+In-memory implementations are defined in `repositories/memory.py`.
+
+Domain entities are frozen dataclasses.
+Updates create new values and persist them through repository methods.
+
+Services will depend on repository contracts rather than concrete
+storage implementations.
