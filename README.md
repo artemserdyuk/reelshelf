@@ -19,6 +19,13 @@ The following components are implemented:
 - Per-application storage isolation.
 - Atomic refresh-session consumption within one event loop.
 
+- User registration at `POST /api/v1/auth/register`.
+- Username normalization and request validation.
+- Argon2 password hashing outside the event-loop thread.
+- Duplicate username protection.
+- Public user responses without password hashes.
+- Password adapter, service, and registration API tests.
+
 Authentication and watchlist endpoints are planned.
 See `docs/api.md` for the target API contract.
 
@@ -117,3 +124,21 @@ repositories.
 
 Goal 8 adds PostgreSQL, async SQLAlchemy, Alembic, Docker Compose,
 CI, structured logging, and database readiness checks.
+
+## Register a User
+
+```bash
+curl -i -X POST http://127.0.0.1:8000/api/v1/auth/register \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"viewer","password":"StrongPassword123!"}'
+```
+
+Registration returns `201 Created` with the user's ID, normalized
+username, and creation timestamp.
+
+Duplicate usernames return `409 Conflict`.
+Invalid requests return `422 Unprocessable Entity`.
+
+Passwords are stored as Argon2 hashes and are never returned.
+Registration does not issue tokens yet.
+Users are lost when the application restarts.

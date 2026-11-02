@@ -2,6 +2,7 @@ from fastapi import FastAPI
 
 from reelshelf.api.error_handlers import register_exception_handlers
 from reelshelf.api.health import router as health_router
+from reelshelf.api.v1.router import router as api_v1_router
 from reelshelf.bootstrap import build_container
 from reelshelf.core.config import Settings
 
@@ -23,4 +24,5 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     register_exception_handlers(app)
 
     app.include_router(health_router)
+    app.include_router(api_v1_router)
     return app
