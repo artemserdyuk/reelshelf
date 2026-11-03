@@ -32,6 +32,9 @@ class Settings(BaseSettings):
         min_length=32,
     )
 
+    jwt_issuer: str = Field(default="reelshelf", min_length=1)
+    jwt_audience: str = Field(default="reelshelf-api", min_length=1)
+
     access_token_minutes: int = Field(
         default=15,
         gt=0,

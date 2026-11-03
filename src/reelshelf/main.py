@@ -11,15 +11,16 @@ def create_app(settings: Settings | None = None) -> FastAPI:
     resolved_settings: Settings = settings if settings is not None else Settings()
 
     app = FastAPI(
-        title="ReelShelf API",
+        title=resolved_settings.app_name,
         version="0.1.0",
         description="A REST API for personal movie watchlists.",
+        debug=False,
     )
 
     app.state.settings = resolved_settings
 
     # One container per app instance, shared by that app's requests.
-    app.state.container = build_container()
+    app.state.container = build_container(resolved_settings)
 
     register_exception_handlers(app)
 

@@ -142,3 +142,22 @@ Invalid requests return `422 Unprocessable Entity`.
 Passwords are stored as Argon2 hashes and are never returned.
 Registration does not issue tokens yet.
 Users are lost when the application restarts.
+
+
+## Authentication
+
+Register a user with `POST /api/v1/auth/register`.
+Log in with `POST /api/v1/auth/login`.
+
+Login currently returns an access token and `token_type: "bearer"`.
+Send the token in the `Authorization: Bearer <token>` header.
+
+`GET /api/v1/users/me` returns the authenticated user's public profile.
+
+Access tokens use HS256 and include subject, token ID, issue time,
+expiration, issuer, audience, and token type claims.
+
+Invalid, expired, or incorrectly signed tokens return 401.
+A token is also rejected if its user no longer exists.
+
+Refresh tokens and rotation are implemented in the next stage.

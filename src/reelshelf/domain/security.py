@@ -1,4 +1,5 @@
 from typing import Protocol
+from uuid import UUID
 
 
 class PasswordHasher(Protocol):
@@ -12,4 +13,14 @@ class PasswordHasher(Protocol):
         password_hash: str,
     ) -> bool:
         """Check a password against a previously stored hash."""
+        ...
+
+
+class AccessTokenCodec(Protocol):
+    def create(self, user_id: UUID) -> str:
+        """Create a signed access token."""
+        ...
+
+    def decode(self, token: str) -> UUID:
+        """Validate a token and return its subject as a UUID."""
         ...

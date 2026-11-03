@@ -22,6 +22,13 @@ Request and response bodies use JSON.
 
 - TokenPair:
   {access_token: string, refresh_token: string, token_type: "bearer"}
+## Implementation Progress
+
+login returns an access-only response:
+{access_token: string, token_type: "bearer"}.
+
+The target TokenPair response, refresh rotation, and logout
+are completed
 
 - EntryCreate:
   {title: string, release_year?: integer | null}

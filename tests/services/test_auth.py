@@ -1,13 +1,13 @@
 from datetime import UTC, datetime
 from typing import cast
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
 
 import pytest
 
 from reelshelf.domain.entities import User
 from reelshelf.domain.errors import ConflictError
-from reelshelf.domain.security import PasswordHasher
+from reelshelf.domain.security import AccessTokenCodec, PasswordHasher
 from reelshelf.repositories.memory import InMemoryUserRepository
 from reelshelf.services.auth import AuthService
 
@@ -21,6 +21,7 @@ async def test_register_saves_hashed_password() -> None:
     service = AuthService(
         users=users,
         password_hasher=cast(PasswordHasher, hasher_mock),
+        tokens=cast(AccessTokenCodec, Mock(spec=AccessTokenCodec)),
     )
 
     user = await service.register(
@@ -53,6 +54,7 @@ async def test_register_rejects_existing_username_before_hashing() -> None:
     service = AuthService(
         users=users,
         password_hasher=cast(PasswordHasher, hasher_mock),
+        tokens=cast(AccessTokenCodec, Mock(spec=AccessTokenCodec)),
     )
 
     with pytest.raises(ConflictError, match="Username is already taken"):
