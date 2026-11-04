@@ -19,11 +19,13 @@ async def get_container(request: Request) -> Container:
 async def get_auth_service(
     container: Annotated[Container, Depends(get_container)],
 ) -> AuthService:
-    # This service uses the existing application-wide repositories.
     return AuthService(
         users=container.users,
         password_hasher=container.password_hasher,
         tokens=container.tokens,
+        refresh_tokens=container.refresh_tokens,
+        sessions=container.refresh_sessions,
+        refresh_lifetime=container.refresh_lifetime,
     )
 
 

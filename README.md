@@ -146,18 +146,21 @@ Users are lost when the application restarts.
 
 ## Authentication
 
-Register a user with `POST /api/v1/auth/register`.
-Log in with `POST /api/v1/auth/login`.
+Register with `POST /api/v1/auth/register`, then log in with
+`POST /api/v1/auth/login`. Login returns `access_token`, `refresh_token`,
+and `token_type: "bearer"`.
 
-Login currently returns an access token and `token_type: "bearer"`.
-Send the token in the `Authorization: Bearer <token>` header.
+Send the access token in the `Authorization: Bearer <token>` header
+to call `GET /api/v1/users/me`.
 
-`GET /api/v1/users/me` returns the authenticated user's public profile.
+Send `{"refresh_token": "<token>"}` to `POST /api/v1/auth/refresh`
+to obtain a new token pair. Replace the old refresh token immediately.
+Replaying a consumed refresh token revokes that login's refresh family.
+Separate logins have separate families. Rotation preserves the original
+family expiration time.
 
-Access tokens use HS256 and include subject, token ID, issue time,
-expiration, issuer, audience, and token type claims.
+Send the same request shape to `POST /api/v1/auth/logout`.
+Success returns HTTP 204 with an empty body. Logout revokes the refresh
+family; existing access tokens remain valid until expiration.
 
-Invalid, expired, or incorrectly signed tokens return 401.
-A token is also rejected if its user no longer exists.
-
-Refresh tokens and rotation are implemented in the next stage.
+Refresh sessions are stored in memory and are lost on application restart.

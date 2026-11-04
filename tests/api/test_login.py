@@ -16,7 +16,7 @@ def register_user(client: TestClient, username: str = "viewer") -> str:
             "password": "StrongPassword123!",
         },
     )
-    assert response.status_code == 201
+    assert response.status_code == 201, response.text
 
     user_id = response.json()["id"]
     assert isinstance(user_id, str)
@@ -31,13 +31,21 @@ def login_user(client: TestClient, username: str = "viewer") -> str:
             "password": "StrongPassword123!",
         },
     )
-    assert response.status_code == 200
-    assert response.json()["token_type"] == "bearer"
+    assert response.status_code == 200, response.text
     assert response.headers["cache-control"] == "no-store"
 
-    token = response.json()["access_token"]
-    assert isinstance(token, str)
-    return token
+    body = response.json()
+    assert body["token_type"] == "bearer"
+
+    access_token = body["access_token"]
+    refresh_token = body["refresh_token"]
+
+    assert isinstance(access_token, str) and access_token.strip()
+    assert isinstance(refresh_token, str) and refresh_token.strip()
+    assert access_token != refresh_token
+
+    # The existing /users/me tests need only the access token.
+    return access_token
 
 
 def test_login_and_me_return_registered_user(client: TestClient) -> None:
@@ -99,6 +107,32 @@ def test_me_rejects_missing_or_invalid_credentials(
     response = client.get("/api/v1/users/me", headers=headers)
 
     assert response.status_code == 401
+    assert response.json()["error"]["code"] == "UNAUTHORIZED"
+    assert response.headers["www-authenticate"] == "Bearer"
+
+
+def test_me_rejects_refresh_token(client: TestClient) -> None:
+    register_user(client)
+
+    login_response = client.post(
+        "/api/v1/auth/login",
+        json={
+            "username": "viewer",
+            "password": "StrongPassword123!",
+        },
+    )
+    assert login_response.status_code == 200, login_response.text
+
+    # Use the real refresh token issued by login as a Bearer credential.
+    refresh_token = login_response.json()["refresh_token"]
+    assert isinstance(refresh_token, str) and refresh_token.strip()
+
+    response = client.get(
+        "/api/v1/users/me",
+        headers={"Authorization": f"Bearer {refresh_token}"},
+    )
+
+    assert response.status_code == 401, response.text
     assert response.json()["error"]["code"] == "UNAUTHORIZED"
     assert response.headers["www-authenticate"] == "Bearer"
 

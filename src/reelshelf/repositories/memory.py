@@ -132,7 +132,7 @@ class InMemoryEntryRepository:
 class InMemoryRefreshSessionRepository:
     def __init__(self) -> None:
         self._sessions: dict[UUID, RefreshSession] = {}
-        self._lock: asyncio.Lock = asyncio.Lock()
+        self._lock = asyncio.Lock()
 
     async def add(self, session: RefreshSession) -> None:
         async with self._lock:
@@ -144,27 +144,15 @@ class InMemoryRefreshSessionRepository:
     async def get_by_jti(self, jti: UUID) -> RefreshSession | None:
         async with self._lock:
             session = self._sessions.get(jti)
+            return None if session is None else replace(session)
 
-            if session is None:
-                return None
-
-            return replace(session)
-
-    async def consume(
-        self,
-        jti: UUID,
-        *,
-        now: datetime,
-    ) -> bool:
-        # Checking and changing the session form one protected operation.
+    async def consume(self, jti: UUID, *, now: datetime) -> bool:
+        # Kept for the repository contract introduced in stage 7.4.
         async with self._lock:
             session = self._sessions.get(jti)
-
-            if session is None:
-                return False
-
             if (
-                session.used_at is not None
+                session is None
+                or session.used_at is not None
                 or session.revoked_at is not None
                 or session.expires_at <= now
             ):
@@ -173,16 +161,81 @@ class InMemoryRefreshSessionRepository:
             self._sessions[jti] = replace(session, used_at=now)
             return True
 
-    async def revoke_family(
-        self,
-        family_id: UUID,
-        *,
-        now: datetime,
-    ) -> None:
+    def _revoke_family_locked(self, family_id: UUID, now: datetime) -> None:
+        # The caller already holds self._lock.
+        for jti, session in self._sessions.items():
+            if session.family_id == family_id and session.revoked_at is None:
+                self._sessions[jti] = replace(session, revoked_at=now)
+
+    async def revoke_family(self, family_id: UUID, *, now: datetime) -> None:
         async with self._lock:
-            for jti, session in self._sessions.items():
-                if session.family_id == family_id and session.revoked_at is None:
-                    self._sessions[jti] = replace(
-                        session,
-                        revoked_at=now,
-                    )
+            self._revoke_family_locked(family_id, now)
+
+    def _active_for_action_locked(
+        self,
+        jti: UUID,
+        user_id: UUID,
+        now: datetime,
+    ) -> RefreshSession | None:
+        session = self._sessions.get(jti)
+
+        if (
+            session is None
+            or session.user_id != user_id
+            or session.revoked_at is not None
+            or session.expires_at <= now
+        ):
+            return None
+
+        if session.used_at is not None:
+            # A consumed token was presented again. Invalidate its successors.
+            self._revoke_family_locked(session.family_id, now)
+            return None
+
+        return session
+
+    async def rotate(
+        self,
+        jti: UUID,
+        *,
+        user_id: UUID,
+        new_jti: UUID,
+        now: datetime,
+    ) -> bool:
+        async with self._lock:
+            current = self._active_for_action_locked(jti, user_id, now)
+            if current is None:
+                return False
+
+            if new_jti in self._sessions:
+                # A generated ID collision is an internal failure.
+                # The old token has not been consumed.
+                raise RuntimeError("Generated refresh token ID already exists.")
+
+            consumed = replace(current, used_at=now)
+            successor = RefreshSession(
+                jti=new_jti,
+                family_id=current.family_id,
+                user_id=current.user_id,
+                expires_at=current.expires_at,
+            )
+
+            # Commit both changes while holding the same lock, without await.
+            self._sessions[jti] = consumed
+            self._sessions[new_jti] = successor
+            return True
+
+    async def logout(
+        self,
+        jti: UUID,
+        *,
+        user_id: UUID,
+        now: datetime,
+    ) -> bool:
+        async with self._lock:
+            current = self._active_for_action_locked(jti, user_id, now)
+            if current is None:
+                return False
+
+            self._revoke_family_locked(current.family_id, now)
+            return True

@@ -41,6 +41,13 @@ class UserResponse(BaseModel):
     created_at: datetime
 
 
-class AccessTokenResponse(BaseModel):
+class RefreshRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    refresh_token: SecretStr = Field(min_length=1)
+
+
+class TokenPairResponse(BaseModel):
     access_token: str
+    refresh_token: str
     token_type: Literal["bearer"] = "bearer"

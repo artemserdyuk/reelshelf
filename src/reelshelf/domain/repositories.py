@@ -56,3 +56,24 @@ class RefreshSessionRepository(Protocol):
         ...
 
     async def revoke_family(self, family_id: UUID, *, now: datetime) -> None: ...
+
+    async def rotate(
+        self,
+        jti: UUID,
+        *,
+        user_id: UUID,
+        new_jti: UUID,
+        now: datetime,
+    ) -> bool:
+        """Replace an active token, or revoke its family on replay."""
+        ...
+
+    async def logout(
+        self,
+        jti: UUID,
+        *,
+        user_id: UUID,
+        now: datetime,
+    ) -> bool:
+        """Revoke the family identified by the presented session."""
+        ...
