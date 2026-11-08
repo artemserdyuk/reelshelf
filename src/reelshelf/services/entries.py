@@ -1,7 +1,7 @@
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
-from reelshelf.domain.entities import WatchlistEntry
+from reelshelf.domain.entities import EntryPage, EntryStatus, WatchlistEntry
 from reelshelf.domain.repositories import EntryRepository
 
 
@@ -27,3 +27,15 @@ class EntryService:
         )
         await self._entries.add(entry)
         return entry
+
+    async def list_for_user(
+        self,
+        *,
+        user_id: UUID,
+        limit: int = 20,
+        offset: int = 0,
+        status: EntryStatus | None = None,
+    ) -> EntryPage:
+        return await self._entries.list_for_user(
+            user_id, limit=limit, offset=offset, status=status
+        )

@@ -1,10 +1,15 @@
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 
 from reelshelf.api.dependencies import get_current_user, get_entry_service
 from reelshelf.domain.entities import User
-from reelshelf.schemas.entries import CreateEntryRequest, EntryResponse
+from reelshelf.schemas.entries import (
+    CreateEntryRequest,
+    EntryListQuery,
+    EntryPageResponse,
+    EntryResponse,
+)
 from reelshelf.schemas.errors import ErrorResponse
 from reelshelf.services.entries import EntryService
 
@@ -32,3 +37,31 @@ async def create_entry(
         release_year=body.release_year,
     )
     return EntryResponse.model_validate(entry)
+
+
+@router.get(
+    "",
+    status_code=status.HTTP_200_OK,
+    response_model=EntryPageResponse,
+    responses={
+        401: {"model": ErrorResponse},
+        422: {"model": ErrorResponse},
+    },
+)
+async def get_list_entries(
+    query: Annotated[EntryListQuery, Query()],
+    current_user: Annotated[User, Depends(get_current_user)],
+    service: Annotated[EntryService, Depends(get_entry_service)],
+) -> EntryPageResponse:
+    page = await service.list_for_user(
+        user_id=current_user.id,
+        status=query.status,
+        limit=query.limit,
+        offset=query.offset,
+    )
+    return EntryPageResponse(
+        items=[EntryResponse.model_validate(entry) for entry in page.items],
+        total=page.total,
+        limit=query.limit,
+        offset=query.offset,
+    )

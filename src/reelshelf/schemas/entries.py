@@ -30,3 +30,18 @@ class EntryResponse(BaseModel):
     rating: int | None
     created_at: datetime
     updated_at: datetime
+
+
+class EntryListQuery(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    status: EntryStatus | None = None
+    limit: int = Field(default=20, ge=1, le=100)
+    offset: int = Field(default=0, ge=0)
+
+
+class EntryPageResponse(BaseModel):
+    items: list[EntryResponse]
+    total: int
+    limit: int
+    offset: int

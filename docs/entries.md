@@ -56,3 +56,63 @@ The service depends on the `EntryRepository` protocol so that a
 database-backed repository can be introduced later.
 
 Duplicate titles are currently allowed.
+
+## List entries
+
+`GET /api/v1/entries`
+
+Requires an access token. Only entries owned by the authenticated
+user are returned.
+
+### Query parameters
+
+| Parameter | Default | Accepted values |
+| --- | --- | --- |
+| `status` | No filter | `planned` or `watched` |
+| `limit` | `20` | Integer from 1 to 100 |
+| `offset` | `0` | Non-negative integer |
+
+Unknown query parameters are rejected.
+
+Example:
+
+```http
+GET /api/v1/entries?status=planned&limit=10&offset=0
+```
+
+### Response
+
+A successful request returns `200 OK` with:
+
+- `items`: entries on the requested page.
+- `total`: number of the user's entries matching the filter,
+  before pagination.
+- `limit`: requested page size.
+- `offset`: requested number of entries to skip.
+
+Entries are ordered by `created_at` descending, then by `id`
+descending to resolve equal timestamps.
+
+An empty collection returns:
+
+```json
+{
+  "items": [],
+  "total": 0,
+  "limit": 20,
+  "offset": 0
+}
+```
+
+An offset beyond the matching collection returns an empty `items`
+array while preserving the matching `total`.
+
+Offset pagination does not provide a fixed snapshot across requests.
+Adding or deleting entries between requests may shift page boundaries.
+
+### Errors
+
+- `401 Unauthorized`: access credentials are missing or invalid.
+- `422 Unprocessable Content`: query parameters are invalid.
+
+All errors use the application's shared error response format.
