@@ -7,6 +7,7 @@ from reelshelf.bootstrap import Container
 from reelshelf.domain.entities import User
 from reelshelf.domain.errors import UnauthorizedError
 from reelshelf.services.auth import AuthService
+from reelshelf.services.entries import EntryService
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -40,3 +41,11 @@ async def get_current_user(
         raise UnauthorizedError("Authentication required.")
 
     return await service.get_current_user(credentials.credentials)
+
+
+async def get_entry_service(
+    container: Annotated[Container, Depends(get_container)],
+) -> EntryService:
+    return EntryService(
+        entries=container.entries,
+    )
