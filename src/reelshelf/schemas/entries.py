@@ -1,9 +1,10 @@
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Self
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
+from reelshelf.domain.commands import EntryChanges
 from reelshelf.domain.entities import EntryStatus
 
 EntryTitle = Annotated[
@@ -45,3 +46,40 @@ class EntryPageResponse(BaseModel):
     total: int
     limit: int
     offset: int
+
+
+class UpdateEntryRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    title: EntryTitle | None = None
+    release_year: int | None = Field(default=None, ge=1888, le=2100, strict=True)
+    status: EntryStatus | None = None
+    rating: int | None = Field(default=None, ge=1, le=10, strict=True)
+
+    @model_validator(mode="after")
+    def validate_patch(self) -> Self:
+        if not self.model_fields_set:
+            raise ValueError("At least one field is required.")
+
+        for name in ("title", "status"):
+            if name in self.model_fields_set and getattr(self, name) is None:
+                raise ValueError(f"{name} must not be null.")
+
+        return self
+
+    def to_changes(self) -> EntryChanges:
+        changes: EntryChanges = {}
+
+        if self.title is not None:
+            changes["title"] = self.title
+
+        if self.status is not None:
+            changes["status"] = self.status
+
+        if "release_year" in self.model_fields_set:
+            changes["release_year"] = self.release_year
+
+        if "rating" in self.model_fields_set:
+            changes["rating"] = self.rating
+
+        return changes

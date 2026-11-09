@@ -1,8 +1,10 @@
+from dataclasses import replace
 from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
+from reelshelf.domain.commands import EntryChanges
 from reelshelf.domain.entities import EntryPage, EntryStatus, WatchlistEntry
-from reelshelf.domain.errors import NotFoundError
+from reelshelf.domain.errors import BusinessRuleError, NotFoundError
 from reelshelf.domain.repositories import EntryRepository
 
 
@@ -53,3 +55,27 @@ class EntryService:
             raise NotFoundError("Watchlist entry not found.")
 
         return entry
+
+    async def update(
+        self,
+        *,
+        entry_id: UUID,
+        user_id: UUID,
+        changes: EntryChanges,
+    ) -> WatchlistEntry:
+        current = await self.get_for_user(entry_id=entry_id, user_id=user_id)
+
+        if not changes:
+            raise BusinessRuleError("At least one field is required.")
+
+        candidate = replace(current, **changes)
+
+        if candidate.rating is not None and candidate.status != EntryStatus.WATCHED:
+            raise BusinessRuleError("Only watched entries can have a rating.")
+
+        if candidate == current:
+            return current
+
+        updated = replace(candidate, updated_at=datetime.now(UTC))
+        await self._entries.update(updated)
+        return updated

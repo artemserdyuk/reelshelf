@@ -10,6 +10,7 @@ from reelshelf.schemas.entries import (
     EntryListQuery,
     EntryPageResponse,
     EntryResponse,
+    UpdateEntryRequest,
 )
 from reelshelf.schemas.errors import ErrorResponse
 from reelshelf.services.entries import EntryService
@@ -86,5 +87,28 @@ async def get_entry(
     entry = await service.get_for_user(
         entry_id=entry_id,
         user_id=current_user.id,
+    )
+    return EntryResponse.model_validate(entry)
+
+
+@router.patch(
+    "/{entry_id}",
+    response_model=EntryResponse,
+    responses={
+        401: {"model": ErrorResponse},
+        404: {"model": ErrorResponse},
+        422: {"model": ErrorResponse},
+    },
+)
+async def update_entry(
+    entry_id: UUID,
+    body: UpdateEntryRequest,
+    current_user: Annotated[User, Depends(get_current_user)],
+    service: Annotated[EntryService, Depends(get_entry_service)],
+) -> EntryResponse:
+    entry = await service.update(
+        entry_id=entry_id,
+        user_id=current_user.id,
+        changes=body.to_changes(),
     )
     return EntryResponse.model_validate(entry)

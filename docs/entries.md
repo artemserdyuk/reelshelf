@@ -161,3 +161,62 @@ Missing and foreign entries return the same response:
   }
 }
 ```
+
+## Update an entry
+
+`PATCH /api/v1/entries/{entry_id}`
+
+Requires an access token. Only the owner can update an entry.
+
+### Request
+
+All fields are optional, but at least one field must be provided.
+
+| Field | Accepted values |
+| --- | --- |
+| `title` | Non-empty trimmed string, up to 200 characters |
+| `release_year` | Integer from 1888 to 2100, or null |
+| `status` | `planned` or `watched` |
+| `rating` | Integer from 1 to 10, or null |
+
+Omitted fields retain their current values.
+Explicit null clears `release_year` or `rating`.
+Explicit null is rejected for `title` and `status`.
+Unknown fields are rejected.
+
+Example:
+
+```json
+{
+  "status": "watched",
+  "rating": 9
+}
+```
+
+Only watched entries can have a rating.
+To move a rated entry back to planned, clear its rating in the same request:
+
+```json
+{
+  "status": "planned",
+  "rating": null
+}
+```
+
+### Response
+
+Returns `200 OK` with the complete updated entry.
+
+The ID, owner, and creation timestamp are preserved.
+The update timestamp changes when the entry's values change.
+A request containing only existing values leaves the entry unchanged.
+
+Rejected requests do not modify the stored entry.
+
+### Errors
+
+- `401 Unauthorized`: access credentials are missing or invalid.
+- `404 Not Found`: the entry is missing or belongs to another user.
+- `422 Unprocessable Content`: invalid input or a business rule violation.
+
+An empty JSON object is rejected with `422`.
