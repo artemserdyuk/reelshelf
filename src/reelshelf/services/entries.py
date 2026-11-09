@@ -79,3 +79,13 @@ class EntryService:
         updated = replace(candidate, updated_at=datetime.now(UTC))
         await self._entries.update(updated)
         return updated
+
+    async def delete_for_user(
+        self,
+        *,
+        entry_id: UUID,
+        user_id: UUID,
+    ) -> None:
+        deleted = await self._entries.delete_for_user(entry_id, user_id)
+        if not deleted:
+            raise NotFoundError("Watchlist entry not found.")

@@ -220,3 +220,49 @@ Rejected requests do not modify the stored entry.
 - `422 Unprocessable Content`: invalid input or a business rule violation.
 
 An empty JSON object is rejected with `422`.
+
+
+
+## Delete an entry
+
+`DELETE /api/v1/entries/{entry_id}`
+
+Requires an access token in the
+`Authorization: Bearer <token>` header.
+
+Only the owner can delete an entry.
+The request does not require a body.
+
+### Successful response
+
+Returns `204 No Content` with an empty response body.
+
+Do not attempt to parse the successful response as JSON.
+
+After deletion:
+
+- Retrieving the entry returns `404`.
+- The entry no longer appears in list responses.
+- Other entries remain unchanged.
+
+### Repeated deletion
+
+Deleting an already deleted entry returns `404 Not Found`.
+The final state remains the same: the entry is absent.
+
+### Errors
+
+- `401 Unauthorized`: access credentials are missing or invalid.
+- `404 Not Found`: the entry is missing or belongs to another user.
+- `422 Unprocessable Content`: the entry ID is not a valid UUID.
+
+Missing and foreign entries return the same error response:
+
+```json
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Watchlist entry not found."
+  }
+}
+```

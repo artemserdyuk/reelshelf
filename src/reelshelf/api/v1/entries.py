@@ -1,7 +1,7 @@
 from typing import Annotated
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query, status
+from fastapi import APIRouter, Depends, Query, Response, status
 
 from reelshelf.api.dependencies import get_current_user, get_entry_service
 from reelshelf.domain.entities import User
@@ -112,3 +112,25 @@ async def update_entry(
         changes=body.to_changes(),
     )
     return EntryResponse.model_validate(entry)
+
+
+@router.delete(
+    "/{entry_id}",
+    status_code=status.HTTP_204_NO_CONTENT,
+    response_class=Response,
+    responses={
+        401: {"model": ErrorResponse},
+        404: {"model": ErrorResponse},
+        422: {"model": ErrorResponse},
+    },
+)
+async def delete_entry(
+    entry_id: UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    service: Annotated[EntryService, Depends(get_entry_service)],
+) -> Response:
+    await service.delete_for_user(
+        entry_id=entry_id,
+        user_id=current_user.id,
+    )
+    return Response(status_code=status.HTTP_204_NO_CONTENT)
