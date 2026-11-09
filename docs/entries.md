@@ -116,3 +116,48 @@ Adding or deleting entries between requests may shift page boundaries.
 - `422 Unprocessable Content`: query parameters are invalid.
 
 All errors use the application's shared error response format.
+
+
+## Get an entry
+
+`GET /api/v1/entries/{entry_id}`
+
+Requires an access token in the
+`Authorization: Bearer <token>` header.
+
+### Path parameter
+
+`entry_id` must be a valid UUID.
+
+### Successful response
+
+Returns `200 OK` with the existing entry:
+
+- `id`
+- `user_id`
+- `title`
+- `release_year`
+- `status`
+- `rating`
+- `created_at`
+- `updated_at`
+
+Only the owner can retrieve the entry.
+Reading an entry does not change its timestamps.
+
+### Errors
+
+- `401 Unauthorized`: access credentials are missing or invalid.
+- `404 Not Found`: the entry does not exist or belongs to another user.
+- `422 Unprocessable Content`: the entry ID is not a valid UUID.
+
+Missing and foreign entries return the same response:
+
+```json
+{
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "Watchlist entry not found."
+  }
+}
+```

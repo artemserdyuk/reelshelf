@@ -2,6 +2,7 @@ from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from reelshelf.domain.entities import EntryPage, EntryStatus, WatchlistEntry
+from reelshelf.domain.errors import NotFoundError
 from reelshelf.domain.repositories import EntryRepository
 
 
@@ -39,3 +40,16 @@ class EntryService:
         return await self._entries.list_for_user(
             user_id, limit=limit, offset=offset, status=status
         )
+
+    async def get_for_user(
+        self,
+        *,
+        entry_id: UUID,
+        user_id: UUID,
+    ) -> WatchlistEntry:
+        entry = await self._entries.get_for_user(user_id=user_id, entry_id=entry_id)
+
+        if entry is None:
+            raise NotFoundError("Watchlist entry not found.")
+
+        return entry

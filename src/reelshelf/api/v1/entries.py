@@ -1,4 +1,5 @@
 from typing import Annotated
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, Query, status
 
@@ -65,3 +66,25 @@ async def get_list_entries(
         limit=query.limit,
         offset=query.offset,
     )
+
+
+@router.get(
+    "/{entry_id}",
+    status_code=status.HTTP_200_OK,
+    response_model=EntryResponse,
+    responses={
+        401: {"model": ErrorResponse},
+        404: {"model": ErrorResponse},
+        422: {"model": ErrorResponse},
+    },
+)
+async def get_entry(
+    entry_id: UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    service: Annotated[EntryService, Depends(get_entry_service)],
+) -> EntryResponse:
+    entry = await service.get_for_user(
+        entry_id=entry_id,
+        user_id=current_user.id,
+    )
+    return EntryResponse.model_validate(entry)
