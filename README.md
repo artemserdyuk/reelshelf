@@ -45,38 +45,38 @@ Goal 8 replaces in-memory storage with PostgreSQL.
 
 - Python 3.14, or permission for uv to install it.
 - uv.
-- Make, if using the convenience commands.
+- Make for the documented one-command startup.
+- Git for cloning the repository.
 
 ## Local Configuration
 
 Run all commands from the repository root.
 
-Install the locked dependencies before the first run:
+For the first local start:
 
 ```bash
-uv sync --locked
+make dev
 ```
 
-If `.env` already exists and contains valid settings, keep it.
-Perform the following configuration steps only for a new local setup.
+This command installs dependencies from `uv.lock`, creates `.env` from
+`.env.example` if needed, generates a local JWT secret, and starts the server.
 
-Before the first application start:
-1. Copy `.env.example` to `.env`.
-2. Generate a local secret:
+If `.env` already exists, it is preserved without changes.
+Invalid existing settings must be corrected manually.
 
-   ```bash
-   uv run python -c "import secrets; print(secrets.token_urlsafe(48))"
-   ```
-   --locked:
-   uv run --locked python -c "import secrets; print(secrets.token_urlsafe(48))"
+For setup without starting the server:
 
-3. Set `REELSHELF_JWT_SECRET` in `.env` to the generated value.
+```bash
+make setup
+make init-env
+```
 
 Do not commit `.env`.
 Environment variables override values from `.env`.
-The application refuses to start with invalid configuration.
-
 Tests use isolated settings and do not require a local `.env`.
+
+These commands configure a local development environment.
+Data remains in memory and is lost when the application restarts.
 
 ## Run
 
@@ -110,7 +110,7 @@ Or run the checks individually:
 ```bash
 uv run --locked ruff check .
 uv run --locked ruff format --check .
-uv run --locked mypy src tests
+uv run --locked mypy src tests scripts
 uv run --locked pytest --cov=reelshelf --cov-report=term-missing --cov-fail-under=80
 ```
 

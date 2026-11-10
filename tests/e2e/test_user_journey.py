@@ -147,15 +147,48 @@ def test_complete_user_journey(journey_client: httpx.Client) -> None:
     )
     assert expect(client, "GET", path, 200, token=pair.access_token).json() == first
 
-    updated = expect(
-        client,
-        "PATCH",
-        path,
-        200,
-        token=pair.access_token,
-        body={"status": "watched", "rating": 9},
+    marked = expect(
+        client, "POST", f"{path}/watched", 200, token=pair.access_token
     ).json()
-    assert updated["status"] == "watched" and updated["rating"] == 9
+    assert marked["status"] == "watched" and marked["rating"] is None
+
+    rated = expect(
+        client, "PATCH", path, 200, token=pair.access_token, body={"rating": 9}
+    ).json()
+    assert rated["rating"] == 9
+    assert (
+        expect(client, "POST", f"{path}/watched", 200, token=pair.access_token).json()
+        == rated
+    )
+
+    summary = expect(
+        client, "GET", "/api/v1/entries/summary", 200, token=pair.access_token
+    ).json()
+    assert summary == {
+        "total": 2,
+        "planned": 1,
+        "watched": 1,
+        "average_rating": 9.0,
+    }
+
+    updated = expect(
+        client, "DELETE", f"{path}/rating", 200, token=pair.access_token
+    ).json()
+    assert updated["status"] == "watched" and updated["rating"] is None
+    assert (
+        expect(client, "DELETE", f"{path}/rating", 200, token=pair.access_token).json()
+        == updated
+    )
+
+    summary = expect(
+        client, "GET", "/api/v1/entries/summary", 200, token=pair.access_token
+    ).json()
+    assert summary == {
+        "total": 2,
+        "planned": 1,
+        "watched": 1,
+        "average_rating": None,
+    }
 
     watched = expect(
         client,
