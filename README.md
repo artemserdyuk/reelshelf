@@ -4,30 +4,24 @@ A REST API for personal movie watchlists.
 
 ## Current Status
 
-The following components are implemented:
-- FastAPI application factory.
-- Validated configuration loaded from environment variables and `.env`.
+The following features are implemented:
+
+- FastAPI application factory and validated environment configuration.
 - Required JWT secret with no default value.
-- Liveness endpoint.
-- Consistent JSON error responses.
-- Isolated configuration and API error tests.
+- Liveness endpoint and consistent JSON error responses.
+- User registration with username normalization and Argon2 password hashing.
+- Login with JWT access and refresh tokens.
+- Refresh-token rotation, replay detection, and logout.
+- Current-user endpoint.
+- Private watchlist creation, listing, retrieval, updates, and deletion.
+- Status filtering and offset pagination.
+- Owner-scoped access to watchlist entries.
+- In-memory repositories isolated per application instance.
+- Automated tests, including a complete user journey.
 - Ruff, strict mypy, and an 80% coverage gate.
 
-- Domain entities for users, watchlist entries, and refresh sessions.
-- Repository protocols and in-memory implementations.
-- Owner-scoped entry operations, filtering, and pagination.
-- Per-application storage isolation.
-- Atomic refresh-session consumption within one event loop.
-
-- User registration at `POST /api/v1/auth/register`.
-- Username normalization and request validation.
-- Argon2 password hashing outside the event-loop thread.
-- Duplicate username protection.
-- Public user responses without password hashes.
-- Password adapter, service, and registration API tests.
-
-Authentication and watchlist endpoints are planned.
-See `docs/api.md` for the target API contract.
+Summary, mark-watched, and clear-rating endpoints remain planned extensions.
+See `docs/api.md` for implemented endpoints and planned additions.
 
 ## Storage Limitations
 
@@ -37,9 +31,10 @@ The application must run as a single process.
 Each application instance owns separate repositories.
 Multiple worker processes would not share their data.
 
-Atomic refresh-session consumption is a storage primitive.
-The complete refresh rotation workflow is implemented in the
-authentication stage.
+Refresh-token rotation is implemented.
+Session consumption and rotation are atomic within the current
+in-memory repository implementation.
+Separate application processes do not share refresh sessions.
 
 Goal 8 replaces in-memory storage with PostgreSQL.
 
@@ -53,6 +48,15 @@ Goal 8 replaces in-memory storage with PostgreSQL.
 
 Run all commands from the repository root.
 
+Install the locked dependencies before the first run:
+
+```bash
+uv sync --locked
+```
+
+If `.env` already exists and contains valid settings, keep it.
+Perform the following configuration steps only for a new local setup.
+
 Before the first application start:
 1. Copy `.env.example` to `.env`.
 2. Generate a local secret:
@@ -60,6 +64,8 @@ Before the first application start:
    ```bash
    uv run python -c "import secrets; print(secrets.token_urlsafe(48))"
    ```
+   --locked:
+   uv run --locked python -c "import secrets; print(secrets.token_urlsafe(48))"
 
 3. Set `REELSHELF_JWT_SECRET` in `.env` to the generated value.
 
@@ -113,9 +119,11 @@ make format
 
 ## Design
 
-- `docs/domain.md`
-- `docs/api.md`
-- `docs/architecture.md`
+- [Domain model and business rules](docs/domain.md)
+- [API contract and planned extensions](docs/api.md)
+- [Architecture and dependency rules](docs/architecture.md)
+- [Watchlist endpoint behaviour](docs/entries.md)
+- [Automated and live HTTP verification](docs/verification.md)
 
 ## Roadmap
 
@@ -140,7 +148,7 @@ Duplicate usernames return `409 Conflict`.
 Invalid requests return `422 Unprocessable Entity`.
 
 Passwords are stored as Argon2 hashes and are never returned.
-Registration does not issue tokens yet.
+Registration does not issue tokens. Log in to obtain a token pair.
 Users are lost when the application restarts.
 
 

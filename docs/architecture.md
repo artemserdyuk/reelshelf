@@ -76,5 +76,5 @@ In-memory implementations are defined in `repositories/memory.py`.
 Domain entities are frozen dataclasses.
 Updates create new values and persist them through repository methods.
 
-Services will depend on repository contracts rather than concrete
+Services depend on repository contracts rather than concrete
 storage implementations.

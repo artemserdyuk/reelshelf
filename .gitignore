@@ -1,24 +1,24 @@
-# Python
-__pycache__/
-*.py[cod]
-.venv/
-*.egg-info/
-dist/
-build/
-
 # Local configuration
 .env
 .env.*
 !.env.example
 
-# Tool caches and reports
+# Python environment and caches
+.venv/
+__pycache__/
+*.py[cod]
 .pytest_cache/
 .mypy_cache/
 .ruff_cache/
+
+# Coverage and build output
 .coverage
 .coverage.*
 htmlcov/
 coverage.xml
+build/
+dist/
+*.egg-info/
 
 # Editors and operating system
 .vscode/

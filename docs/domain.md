@@ -52,7 +52,10 @@ Raw refresh tokens are not stored.
 - Missing entries and entries owned by another user both return 404.
 - New entries start with status planned and no rating.
 - Only watched entries may have a rating.
-- Moving an entry back to planned clears its rating.
+- Moving a rated entry back to planned requires explicitly clearing its
+  rating in the same update.
+- If the resulting entry is planned and still has a rating, the update
+  is rejected without changing stored data.
 - A refresh token may be used successfully only once.
 - Refreshing consumes the current refresh token and issues a new token pair.
 - Reuse of a consumed refresh token revokes its entire session family.
