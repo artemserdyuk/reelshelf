@@ -45,6 +45,10 @@ Request and response bodies use JSON.
 - ErrorResponse:
   {error: {code: string, message: string}}
 
+- SummaryResponse:
+  {total: integer, planned: integer, watched: integer,
+   average_rating: number | null}
+
 ## Endpoints
 
 ## Implemented Endpoints
@@ -61,6 +65,7 @@ Request and response bodies use JSON.
 | GET | /entries/{entry_id} | Yes | UUID path parameter | 200 EntryResponse | 401, 404, 422 |
 | PATCH | /entries/{entry_id} | Yes | UUID + EntryPatch | 200 EntryResponse | 401, 404, 422 |
 | DELETE | /entries/{entry_id} | Yes | UUID path parameter | 204, no body | 401, 404, 422 |
+| GET | /entries/summary | Yes | None | 200 SummaryResponse | 401 |
 
 ## Planned Extensions — Not Implemented
 
@@ -68,7 +73,6 @@ These endpoints are planned and are not available in the current application.
 
 | Method | Path | Purpose |
 |---|---|---|
-| GET | /entries/summary | Summarize the current user's watchlist |
 | POST | /entries/{entry_id}/watched | Mark an entry as watched |
 | DELETE | /entries/{entry_id}/rating | Clear an entry's rating |
 

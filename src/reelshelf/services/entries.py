@@ -3,7 +3,12 @@ from datetime import UTC, datetime
 from uuid import UUID, uuid4
 
 from reelshelf.domain.commands import EntryChanges
-from reelshelf.domain.entities import EntryPage, EntryStatus, WatchlistEntry
+from reelshelf.domain.entities import (
+    EntryPage,
+    EntryStatus,
+    EntrySummary,
+    WatchlistEntry,
+)
 from reelshelf.domain.errors import BusinessRuleError, NotFoundError
 from reelshelf.domain.repositories import EntryRepository
 
@@ -89,3 +94,6 @@ class EntryService:
         deleted = await self._entries.delete_for_user(entry_id, user_id)
         if not deleted:
             raise NotFoundError("Watchlist entry not found.")
+
+    async def summary_for_user(self, *, user_id: UUID) -> EntrySummary:
+        return await self._entries.summary_for_user(user_id)

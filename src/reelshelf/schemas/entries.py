@@ -83,3 +83,12 @@ class UpdateEntryRequest(BaseModel):
             changes["rating"] = self.rating
 
         return changes
+
+
+class EntrySummaryResponse(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    total: int = Field(ge=0)
+    planned: int = Field(ge=0)
+    watched: int = Field(ge=0)
+    average_rating: float | None = Field(ge=1, le=10)

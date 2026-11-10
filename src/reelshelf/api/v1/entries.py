@@ -10,6 +10,7 @@ from reelshelf.schemas.entries import (
     EntryListQuery,
     EntryPageResponse,
     EntryResponse,
+    EntrySummaryResponse,
     UpdateEntryRequest,
 )
 from reelshelf.schemas.errors import ErrorResponse
@@ -67,6 +68,19 @@ async def get_list_entries(
         limit=query.limit,
         offset=query.offset,
     )
+
+
+@router.get(
+    "/summary",
+    response_model=EntrySummaryResponse,
+    responses={401: {"model": ErrorResponse}},
+)
+async def get_entry_summary(
+    current_user: Annotated[User, Depends(get_current_user)],
+    service: Annotated[EntryService, Depends(get_entry_service)],
+) -> EntrySummaryResponse:
+    summary = await service.summary_for_user(user_id=current_user.id)
+    return EntrySummaryResponse.model_validate(summary)
 
 
 @router.get(

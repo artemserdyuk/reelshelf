@@ -6,6 +6,7 @@ from uuid import UUID
 from reelshelf.domain.entities import (
     EntryPage,
     EntryStatus,
+    EntrySummary,
     RefreshSession,
     User,
     WatchlistEntry,
@@ -127,6 +128,30 @@ class InMemoryEntryRepository:
 
         del self._entries[entry_id]
         return True
+
+    async def summary_for_user(self, user_id: UUID) -> EntrySummary:
+        total = planned = watched = rating_sum = rated_count = 0
+
+        for entry in self._entries.values():
+            if entry.user_id != user_id:
+                continue
+
+            total += 1
+            if entry.status == EntryStatus.PLANNED:
+                planned += 1
+            else:
+                watched += 1
+
+            if entry.rating is not None:
+                rating_sum += entry.rating
+                rated_count += 1
+
+        return EntrySummary(
+            total=total,
+            planned=planned,
+            watched=watched,
+            average_rating=rating_sum / rated_count if rated_count else None,
+        )
 
 
 class InMemoryRefreshSessionRepository:

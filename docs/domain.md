@@ -68,8 +68,8 @@ Raw refresh tokens are not stored.
 - Current-user endpoint.
 - Private watchlist CRUD.
 - Filtering and pagination.
-- Three later extensions: summary, mark watched, and clear rating.
-- In-memory repositories.
+- Watchlist summary with owner-scoped counts and average rating.
+- Two planned extensions, not yet implemented: mark watched and clear rating.- In-memory repositories.
 - Automated tests and setup documentation.
 
 ## Out of Scope

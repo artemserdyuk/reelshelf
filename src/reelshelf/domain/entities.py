@@ -45,3 +45,11 @@ class RefreshSession:
 class EntryPage:
     items: tuple[WatchlistEntry, ...]
     total: int
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class EntrySummary:
+    total: int
+    planned: int
+    watched: int
+    average_rating: float | None

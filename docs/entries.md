@@ -266,3 +266,41 @@ Missing and foreign entries return the same error response:
   }
 }
 ```
+
+
+## Watchlist summary
+
+`GET /api/v1/entries/summary`
+
+Requires an access token in the `Authorization: Bearer <token>` header.
+
+Returns statistics for all entries owned by the authenticated user.
+The operation does not use list pagination or status filtering.
+
+### Response
+
+```json
+{
+  "total": 4,
+  "planned": 1,
+  "watched": 3,
+  "average_rating": 8.5
+}
+```
+
+- `total`: number of owned entries.
+- `planned`: number of planned entries.
+- `watched`: number of watched entries.
+- `average_rating`: arithmetic mean of non-null ratings.
+
+Unrated entries are excluded from the average.
+The average is not explicitly rounded.
+If no ratings exist, `average_rating` is null.
+
+An empty watchlist returns zero counts and a null average.
+Foreign entries do not affect any result.
+Reading the summary does not modify entries.
+
+### Errors
+
+- `401 Unauthorized`: access credentials are missing or invalid.

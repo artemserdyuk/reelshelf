@@ -19,6 +19,7 @@ The following features are implemented:
 - In-memory repositories isolated per application instance.
 - Automated tests, including a complete user journey.
 - Ruff, strict mypy, and an 80% coverage gate.
+- Owner-scoped watchlist statistics, including average rating.
 
 Summary, mark-watched, and clear-rating endpoints remain planned extensions.
 See `docs/api.md` for implemented endpoints and planned additions.

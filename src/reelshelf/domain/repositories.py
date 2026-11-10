@@ -5,6 +5,7 @@ from uuid import UUID
 from reelshelf.domain.entities import (
     EntryPage,
     EntryStatus,
+    EntrySummary,
     RefreshSession,
     User,
     WatchlistEntry,
@@ -44,6 +45,10 @@ class EntryRepository(Protocol):
         ...
 
     async def delete_for_user(self, entry_id: UUID, user_id: UUID) -> bool: ...
+
+    async def summary_for_user(self, user_id: UUID) -> EntrySummary:
+        """Aggregate all entries owned by this user, without pagination."""
+        ...
 
 
 class RefreshSessionRepository(Protocol):
