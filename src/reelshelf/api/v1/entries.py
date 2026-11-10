@@ -42,6 +42,28 @@ async def create_entry(
     return EntryResponse.model_validate(entry)
 
 
+@router.post(
+    "/{entry_id}/watched",
+    status_code=status.HTTP_200_OK,
+    response_model=EntryResponse,
+    responses={
+        401: {"model": ErrorResponse},
+        404: {"model": ErrorResponse},
+        422: {"model": ErrorResponse},
+    },
+)
+async def mark_entry_watched(
+    entry_id: UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    service: Annotated[EntryService, Depends(get_entry_service)],
+) -> EntryResponse:
+    entry = await service.mark_watched(
+        entry_id=entry_id,
+        user_id=current_user.id,
+    )
+    return EntryResponse.model_validate(entry)
+
+
 @router.get(
     "",
     status_code=status.HTTP_200_OK,

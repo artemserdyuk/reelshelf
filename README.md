@@ -20,6 +20,7 @@ The following features are implemented:
 - Automated tests, including a complete user journey.
 - Ruff, strict mypy, and an 80% coverage gate.
 - Owner-scoped watchlist statistics, including average rating.
+- Mark-watched endpoint with idempotent behaviour and rating preservation.
 
 Summary, mark-watched, and clear-rating endpoints remain planned extensions.
 See `docs/api.md` for implemented endpoints and planned additions.

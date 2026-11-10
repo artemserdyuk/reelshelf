@@ -52,6 +52,7 @@ Raw refresh tokens are not stored.
 - Missing entries and entries owned by another user both return 404.
 - New entries start with status planned and no rating.
 - Only watched entries may have a rating.
+- Marking an already watched entry leaves its rating and timestamps unchanged.
 - Moving a rated entry back to planned requires explicitly clearing its
   rating in the same update.
 - If the resulting entry is planned and still has a rating, the update
@@ -69,7 +70,8 @@ Raw refresh tokens are not stored.
 - Private watchlist CRUD.
 - Filtering and pagination.
 - Watchlist summary with owner-scoped counts and average rating.
-- Two planned extensions, not yet implemented: mark watched and clear rating.- In-memory repositories.
+- Mark-watched action that preserves existing ratings.
+- One planned extension, not yet implemented: clear rating.
 - Automated tests and setup documentation.
 
 ## Out of Scope

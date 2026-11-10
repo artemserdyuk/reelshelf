@@ -66,6 +66,7 @@ Request and response bodies use JSON.
 | PATCH | /entries/{entry_id} | Yes | UUID + EntryPatch | 200 EntryResponse | 401, 404, 422 |
 | DELETE | /entries/{entry_id} | Yes | UUID path parameter | 204, no body | 401, 404, 422 |
 | GET | /entries/summary | Yes | None | 200 SummaryResponse | 401 |
+| POST | /entries/{entry_id}/watched | Yes | UUID, no body required | 200 EntryResponse | 401, 404, 422 |
 
 ## Planned Extensions — Not Implemented
 
@@ -73,7 +74,6 @@ These endpoints are planned and are not available in the current application.
 
 | Method | Path | Purpose |
 |---|---|---|
-| POST | /entries/{entry_id}/watched | Mark an entry as watched |
 | DELETE | /entries/{entry_id}/rating | Clear an entry's rating |
 
 Planned SummaryResponse:
@@ -85,7 +85,6 @@ Planned behaviour:
 
 - Summary counts only the current user's entries.
 - average_rating excludes entries without a rating and is null when none exist.
-- Marking an already watched entry is idempotent and preserves its rating.
 - Clearing an absent rating is idempotent.
 - Register /entries/summary before /entries/{entry_id}.
 
@@ -107,6 +106,9 @@ Planned behaviour:
 - Access and refresh tokens cannot be used interchangeably.
 - Framework 404/405 and unexpected 500 errors use ErrorResponse.
 - Unexpected errors never expose internal exception details.
+- Marking an entry as watched preserves its existing rating.
+- Marking an already watched entry leaves all fields, including updated_at,
+  unchanged.
 
 ## Infrastructure
 

@@ -304,3 +304,44 @@ Reading the summary does not modify entries.
 ### Errors
 
 - `401 Unauthorized`: access credentials are missing or invalid.
+
+
+## Mark an entry as watched
+
+`POST /api/v1/entries/{entry_id}/watched`
+
+Requires an access token in the `Authorization: Bearer <token>` header.
+
+### Request
+
+`entry_id` must be a valid UUID.
+No request body is required.
+
+Only the owner can perform this action.
+
+### Successful response
+
+Returns `200 OK` with the complete EntryResponse.
+
+A planned entry becomes watched.
+Its ID, owner, title, release year, creation timestamp, and rating
+are preserved.
+
+The update timestamp changes when the status changes.
+
+### Repeated requests
+
+Marking an already watched entry leaves it unchanged.
+An existing rating is preserved.
+The update timestamp is also preserved.
+
+The operation has idempotent behaviour.
+
+### Errors
+
+- `401 Unauthorized`: access credentials are missing or invalid.
+- `404 Not Found`: the entry is missing or belongs to another user.
+- `422 Unprocessable Content`: the entry ID is not a valid UUID.
+
+Missing and foreign entries return the same error response.
+Rejected requests do not modify the entry.

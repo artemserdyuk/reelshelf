@@ -97,3 +97,15 @@ class EntryService:
 
     async def summary_for_user(self, *, user_id: UUID) -> EntrySummary:
         return await self._entries.summary_for_user(user_id)
+
+    async def mark_watched(
+        self,
+        *,
+        entry_id: UUID,
+        user_id: UUID,
+    ) -> WatchlistEntry:
+        return await self.update(
+            entry_id=entry_id,
+            user_id=user_id,
+            changes={"status": EntryStatus.WATCHED},
+        )
