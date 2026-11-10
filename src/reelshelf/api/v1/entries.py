@@ -170,3 +170,25 @@ async def delete_entry(
         user_id=current_user.id,
     )
     return Response(status_code=status.HTTP_204_NO_CONTENT)
+
+
+@router.delete(
+    "/{entry_id}/rating",
+    status_code=status.HTTP_200_OK,
+    response_model=EntryResponse,
+    responses={
+        401: {"model": ErrorResponse},
+        404: {"model": ErrorResponse},
+        422: {"model": ErrorResponse},
+    },
+)
+async def clear_entry_rating(
+    entry_id: UUID,
+    current_user: Annotated[User, Depends(get_current_user)],
+    service: Annotated[EntryService, Depends(get_entry_service)],
+) -> EntryResponse:
+    entry = await service.clear_rating(
+        entry_id=entry_id,
+        user_id=current_user.id,
+    )
+    return EntryResponse.model_validate(entry)

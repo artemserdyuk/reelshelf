@@ -345,3 +345,58 @@ The operation has idempotent behaviour.
 
 Missing and foreign entries return the same error response.
 Rejected requests do not modify the entry.
+
+
+## Clear an entry's rating
+
+`DELETE /api/v1/entries/{entry_id}/rating`
+
+Requires an access token in the `Authorization: Bearer <token>` header.
+
+### Request
+
+`entry_id` must be a valid UUID.
+No request body is required.
+
+Only the owner can clear the rating.
+
+### Successful response
+
+Returns `200 OK` with the complete EntryResponse.
+
+The rating becomes null.
+The entry itself is not deleted.
+
+The ID, owner, title, release year, status, and creation timestamp
+are preserved.
+
+The update timestamp changes when an existing rating is removed.
+
+### Repeated requests
+
+If the rating is already null, the entry remains unchanged,
+including its update timestamp.
+
+This behaviour applies to both planned and watched entries.
+The operation is idempotent.
+
+### Summary
+
+An entry without a rating is excluded from the average rating.
+Clearing a rating does not change the total, planned, or watched counts.
+
+### Errors
+
+- `401 Unauthorized`: access credentials are missing or invalid.
+- `404 Not Found`: the entry is missing or belongs to another user.
+- `422 Unprocessable Content`: the entry ID is not a valid UUID.
+
+Missing and foreign entries return the same error response.
+Rejected requests do not modify the entry.
+
+### Difference from deleting an entry
+
+`DELETE /entries/{entry_id}` deletes the entry and returns 204 without a body.
+
+`DELETE /entries/{entry_id}/rating` clears only the rating and returns
+200 with the updated entry.

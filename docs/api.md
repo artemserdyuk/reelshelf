@@ -67,26 +67,7 @@ Request and response bodies use JSON.
 | DELETE | /entries/{entry_id} | Yes | UUID path parameter | 204, no body | 401, 404, 422 |
 | GET | /entries/summary | Yes | None | 200 SummaryResponse | 401 |
 | POST | /entries/{entry_id}/watched | Yes | UUID, no body required | 200 EntryResponse | 401, 404, 422 |
-
-## Planned Extensions — Not Implemented
-
-These endpoints are planned and are not available in the current application.
-
-| Method | Path | Purpose |
-|---|---|---|
-| DELETE | /entries/{entry_id}/rating | Clear an entry's rating |
-
-Planned SummaryResponse:
-
-{total: integer, planned: integer, watched: integer,
- average_rating: number | null}
-
-Planned behaviour:
-
-- Summary counts only the current user's entries.
-- average_rating excludes entries without a rating and is null when none exist.
-- Clearing an absent rating is idempotent.
-- Register /entries/summary before /entries/{entry_id}.
+| DELETE | /entries/{entry_id}/rating | Yes | UUID, no body required | 200 EntryResponse | 401, 404, 422 |
 
 ## Behaviour
 
@@ -109,6 +90,12 @@ Planned behaviour:
 - Marking an entry as watched preserves its existing rating.
 - Marking an already watched entry leaves all fields, including updated_at,
   unchanged.
+- Clearing a rating sets it to null without deleting the entry or changing
+  its status.
+- Clearing an absent rating leaves all fields, including updated_at, unchanged.
+- Clear-rating returns 200 with EntryResponse; deleting an entry returns
+  204 without a body.
+- Register GET /entries/summary before GET /entries/{entry_id}.
 
 ## Infrastructure
 

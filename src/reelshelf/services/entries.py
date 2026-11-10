@@ -109,3 +109,15 @@ class EntryService:
             user_id=user_id,
             changes={"status": EntryStatus.WATCHED},
         )
+
+    async def clear_rating(
+        self,
+        *,
+        entry_id: UUID,
+        user_id: UUID,
+    ) -> WatchlistEntry:
+        return await self.update(
+            entry_id=entry_id,
+            user_id=user_id,
+            changes={"rating": None},
+        )

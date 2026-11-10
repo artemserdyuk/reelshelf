@@ -53,6 +53,8 @@ Raw refresh tokens are not stored.
 - New entries start with status planned and no rating.
 - Only watched entries may have a rating.
 - Marking an already watched entry leaves its rating and timestamps unchanged.
+- Clearing a rating preserves the entry and its status.
+- Clearing an absent rating leaves the entry and its timestamps unchanged.
 - Moving a rated entry back to planned requires explicitly clearing its
   rating in the same update.
 - If the resulting entry is planned and still has a rating, the update
@@ -71,7 +73,7 @@ Raw refresh tokens are not stored.
 - Filtering and pagination.
 - Watchlist summary with owner-scoped counts and average rating.
 - Mark-watched action that preserves existing ratings.
-- One planned extension, not yet implemented: clear rating.
+- Clear-rating action that preserves the entry and its status.
 - Automated tests and setup documentation.
 
 ## Out of Scope

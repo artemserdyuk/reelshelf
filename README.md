@@ -21,9 +21,10 @@ The following features are implemented:
 - Ruff, strict mypy, and an 80% coverage gate.
 - Owner-scoped watchlist statistics, including average rating.
 - Mark-watched endpoint with idempotent behaviour and rating preservation.
+- Clear-rating endpoint with idempotent behaviour and status preservation.
 
 Summary, mark-watched, and clear-rating endpoints remain planned extensions.
-See `docs/api.md` for implemented endpoints and planned additions.
+See `docs/api.md` for the implemented API contract.
 
 ## Storage Limitations
 
@@ -122,7 +123,7 @@ make format
 ## Design
 
 - [Domain model and business rules](docs/domain.md)
-- [API contract and planned extensions](docs/api.md)
+- [API contract](docs/api.md)
 - [Architecture and dependency rules](docs/architecture.md)
 - [Watchlist endpoint behaviour](docs/entries.md)
 - [Automated and live HTTP verification](docs/verification.md)
